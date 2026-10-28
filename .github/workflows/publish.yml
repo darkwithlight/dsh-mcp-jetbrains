@@ -1,0 +1,59 @@
+# 用 tag 触发发布：推送 v* 标签即发布到 npm。
+#
+# 认证走 OIDC Trusted Publishing：没有任何 NPM_TOKEN secret，
+# npm 通过 GitHub 的 id-token 验证"这个包确实由这个仓库的这个 workflow 构建"，
+# 并自动附带 provenance 签名。
+#
+# 前置（只需配一次，已在 npm 包设置页完成）：
+#   Owner: darkwithlight  Repository: dsh-mcp-jetbrains  Workflow: publish.yml
+name: publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OIDC 与 provenance 必需
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # 产物（lib/index.js、client.js）已入库，发布不需要安装依赖；
+      # 本仓库的 pnpm install 还会因上游未发布的包而失败，所以这一步刻意跳过。
+
+      - name: 校验 tag 与 package.json 版本一致
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          echo "tag=$tag package=$pkg"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::tag v$tag 与 package.json 的版本 $pkg 不一致"
+            exit 1
+          fi
+
+      - name: 核对产物完整性
+        run: |
+          node --check lib/index.js
+          node --check client.js
+          if grep -n '^import ' client.js; then
+            echo "::error::client.js 里不允许出现 import"
+            exit 1
+          fi
+
+      - name: npm 版本（OIDC 需要 11.5+）
+        run: npm --version
+
+      - name: 发布
+        run: npm publish --provenance --access public
