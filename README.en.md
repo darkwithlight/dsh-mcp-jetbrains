@@ -38,19 +38,21 @@ The principle that follows:
 
 Requires IDE 2025.2+ (built-in MCP Server, enabled by default) with a reachable MCP Server endpoint.
 
-**Install from npm** (recommended, package name `dsh-mcp-jetbrains`):
+**Install from npm** (recommended):
 
 ```text
-npm i dsh-mcp-jetbrains
+dsh plugin --profile web add dsh-mcp-jetbrains
 ```
 
-**Install from source** (for development):
+Restart DSH (`dsh web`) afterwards, then open **Settings → JetBrains IDE 连接**.
+
+**Install from source** (development, linked):
 
 ```text
-plugin_manager install_bundle  target = <this repository root>
+dsh plugin --profile web add link:<this repository root>
 ```
 
-**Reinstalling requires `remove_bundle` first**: linked plugins are not hot-reloaded; editing sources changes nothing until reinstalled.
+`dsh plugin` forwards its arguments to pnpm inside the profile directory, so `remove`, `why`, and friends work too. Linked plugins are not hot-reloaded: edit the sources, then reinstall.
 
 Then open **Settings → JetBrains IDE 连接**.
 

@@ -38,21 +38,21 @@ DSH 侧只做连接管理器，**不往 IDE 里装任何东西**：IDE 自 2025.
 
 前提：IDE 2025.2+（内置 MCP Server，默认启用），且 IDE 侧 MCP Server 可访问。
 
-**从 npm 安装**（推荐，包名 `dsh-mcp-jetbrains`）：
+**从 npm 安装**（推荐）：
 
 ```text
-npm i dsh-mcp-jetbrains
+dsh plugin --profile web add dsh-mcp-jetbrains
 ```
 
-**从仓库源码安装**（开发用）：
+装完重启 DSH（`dsh web`），再进 **设置 → JetBrains IDE 连接**。
+
+**从仓库源码安装**（开发用，linked）：
 
 ```text
-plugin_manager install_bundle  target = <本仓库根目录>
+dsh plugin --profile web add link:<本仓库根目录>
 ```
 
-**重装必须先 `remove_bundle` 再 `install_bundle`**：linked 插件不热更新，改源码不会自动生效。
-
-安装后进入 **设置 → JetBrains IDE 连接**。
+`dsh plugin` 把参数原样转给该 profile 目录里的 pnpm，所以 `remove`、`why` 等子命令同样可用。改源码后需要重装才生效（linked 插件不热更新）。
 
 连接配置存在：
 
