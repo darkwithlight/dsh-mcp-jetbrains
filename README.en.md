@@ -38,6 +38,14 @@ The principle that follows:
 
 Requires IDE 2025.2+ (built-in MCP Server, enabled by default) with a reachable MCP Server endpoint.
 
+**Install from npm** (recommended, package name `dsh-mcp-jetbrains`):
+
+```text
+npm i dsh-mcp-jetbrains
+```
+
+**Install from source** (for development):
+
 ```text
 plugin_manager install_bundle  target = <this repository root>
 ```

@@ -38,6 +38,14 @@ DSH 侧只做连接管理器，**不往 IDE 里装任何东西**：IDE 自 2025.
 
 前提：IDE 2025.2+（内置 MCP Server，默认启用），且 IDE 侧 MCP Server 可访问。
 
+**从 npm 安装**（推荐，包名 `dsh-mcp-jetbrains`）：
+
+```text
+npm i dsh-mcp-jetbrains
+```
+
+**从仓库源码安装**（开发用）：
+
 ```text
 plugin_manager install_bundle  target = <本仓库根目录>
 ```
