@@ -1,0 +1,16 @@
+# 行尾口径：代码与配置一律 LF，中文文档与 PowerShell 脚本用 CRLF
+# 依据见 AGENTS.md「脚本纪律」与本次提交的实测（本机 core.autocrlf=true 会把 LF 改写成 CRLF）
+* text=auto eol=lf
+
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.svg text eol=lf
+
+*.md text eol=crlf
+*.ps1 text eol=crlf
+*.log -text
+
+*.png binary

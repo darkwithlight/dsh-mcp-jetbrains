@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "."
+  },
+  "include": ["src/client.tsx", "src/env.d.ts"],
+  "exclude": []
+}

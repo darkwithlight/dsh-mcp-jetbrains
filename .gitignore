@@ -1,0 +1,11 @@
+# IDEA 缓存配置：整体忽略，需要追踪的走白名单
+/.idea/*
+# IDEA 自带的忽略清单，内部已挡掉 workspace.xml / shelf / dataSources 等
+!/.idea/.gitignore
+# 项目级设置 misc.xml 含本机绝对路径（如 sbt launcher 的 D:/...），暂不放行
+# 插件依赖（peerDependencies 只为解析，不从仓库装）
+node_modules/
+# 插件根的 pnpm-lock 不入库：它只钉一个 devDependency（typescript），且该目录的
+# pnpm install 目前会因上游 @deepseek-ai/dsh-type-meta 未发布而 404，lock 无法再生成/校验。
+# 详见 pnpm-workspace.yaml 的 verifyDepsBeforeRun 说明。
+pnpm-lock.yaml

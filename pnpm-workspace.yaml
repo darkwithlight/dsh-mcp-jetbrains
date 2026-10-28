@@ -1,0 +1,6 @@
+# pnpm 11 在 `pnpm run` / `pnpm exec` 前会默认校验依赖并自动触发 install。
+# 本包只需要编译期依赖 typescript；peerDependencies 里的 @deepseek-ai/* 是 DSH
+# 运行期由宿主/安装器提供的包，公共 registry 上依赖树不全（install 会撞
+# @deepseek-ai/dsh-type-meta 的 404）。因此关掉跑脚本前的自动安装校验，
+# `pnpm build` 直接执行 tsc。相关背景见本仓库 .gitignore 的 peerDependencies 注记。
+verifyDepsBeforeRun: false
