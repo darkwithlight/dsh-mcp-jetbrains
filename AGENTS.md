@@ -81,6 +81,50 @@ pnpm build        # tsc -p tsconfig.host.json && tsc -p tsconfig.client.json
 
 - `package.json` 的 `version` 与 `src/index.ts` 里的 `PLUGIN_VERSION` **必须同时改**（后者进 MCP `clientInfo`，用于日志与诊断）。
 - 发布前过一遍上面的验收清单。
+- 包已发布：`dsh-mcp-jetbrains`（<https://www.npmjs.com/package/dsh-mcp-jetbrains>）。`private` 已移除，`publishConfig` 钉死 `access: public` 与 `registry: https://registry.npmjs.org`（本机 npm 默认源是 npmmirror 镜像，不发布到镜像）。
+
+### 为什么是手动发布（2026-10-28 实测结论）
+
+想走 Trusted Publisher（OIDC，零 token + provenance）时被两道墙拦住：
+
+1. **OIDC 不能发首版**——npm 有意不支持（[npm/cli#8544](https://github.com/npm/cli/issues/8544)），必须先用 token 把包名占住。占名已完成。
+2. **建 Trusted Publisher 要求账户先开 2FA**，而 npm 的 2FA 设置页**只提供硬件安全密钥（WebAuthn）**，没有验证器 App（TOTP）选项；没有 FIDO2 设备就卡在 `Device registration failed`。
+
+所以当前唯一可用路径是**手动 + 短期 granular token**。仓库里的 `.github/workflows/publish.yml` 是给 OIDC 准备的，**暂时处于休眠状态**（只在推 `v*` 标签时触发，手动流程不打标签）。等有了硬件密钥并配好 Trusted Publisher，它立刻可用。
+
+### 发布访问策略（改之前先看）
+
+包的 Publishing access 必须保持**宽松档**：`Require two-factor authentication or a granular access token with bypass 2fa enabled`。
+
+若切成推荐档（`Require 2FA and disallow bypass tokens`），**bypass token 就再也发不了包**——而 token 是当前唯一路径。切之前先确认新路径已经能用。
+
+### 手动发版流程
+
+```text
+1. 改版本：package.json 的 version + src/index.ts 的 PLUGIN_VERSION
+2. pnpm build
+3. 过验收清单（四文件静态检查 0、client.js 零 import、无 cookie 路由 401）
+4. npm 网页生成 granular token（Read and write；勾 bypass 2FA；7 天）
+5. npm config set //registry.npmjs.org/:_authToken=<token>
+6. npm publish                     # 不要带 --registry，publishConfig 已钉死官方源
+7. npm view dsh-mcp-jetbrains version   # 确认新版本可查
+8. 立刻删 token：https://www.npmjs.com/settings/<用户名>/tokens
+9. git tag v<version> && git push --tags    # tag 只作标记，不触发 CI 发布
+```
+
+注意点：
+
+- **token 不要写进仓库、不要粘进对话**；它等同短期发包权，用完即删。
+- `npm publish` 读的是**当前目录磁盘上的文件**，不是 git 里的内容——确认工作树是你想发的状态。
+- 首次发布会额外产生一个 `0.0.0-stage` 占位版本，是 npm 的内部标记，不用管它。
+
+### 2027-01 之后的变化（已知风险）
+
+npm 计划于 2027 年 1 月取消「bypass-2FA token 直接发布」的能力（[公告](https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/)）。届时只剩三条路：
+
+1. **硬件安全密钥** + Trusted Publisher（最干净）；
+2. 用 GitHub Actions + 存 `NPM_TOKEN` secret（能发，但等于把长期发包权交给第三方）；
+3. **在 npm 上标记停止维护，只更新 GitHub** —— 仓主已表态接受这条兜底，所以不必为了发版强行采购硬件。
 
 ## 关键实现位置（改之前先看）
 
